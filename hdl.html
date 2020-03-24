@@ -12,7 +12,7 @@
 
         nes.setRom(new NesJs.Rom(buffer));
         nes.setDisplay(new NesJs.Display(document.getElementById('gameCanvas')));
-        nes.setAudio(new NesJs.Audio());
+       // nes.setAudio(new NesJs.Audio());
 
         window.onkeydown = function(e) { nes.handleKeyDown(e); };
         window.onkeyup = function(e) { nes.handleKeyUp(e); };
