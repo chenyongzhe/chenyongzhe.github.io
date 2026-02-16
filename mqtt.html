@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>MQTT 开关 /chenyongzhe</title>
+<style>
+  body{display:flex;gap:20px;justify-content:center;margin-top:50px}
+  button{width:150px;height:70px;font-size:24px;border:none;border-radius:10px;color:white}
+  #on{background:#2ecc71}
+  #off{background:#e74c3c}
+</style>
+</head>
+<body>
+
+<button id="on">发送 ON</button>
+<button id="off">发送 OFF</button>
+
+<script src="https://cdn.jsdelivr.net/npm/mqtt@4.3.7/dist/mqtt.min.js"></script>
+<script>
+// 公共无加密 MQTT
+const client = mqtt.connect('ws://broker.emqx.io:8083/mqtt')
+
+const TOPIC = '/chenyongzhe'
+
+client.on('connect', function () {
+  console.log('✅ MQTT 连接成功')
+})
+
+document.getElementById('on').onclick = () => {
+  client.publish(TOPIC, 'ON')
+  console.log('已发送：ON')
+}
+
+document.getElementById('off').onclick = () => {
+  client.publish(TOPIC, 'OFF')
+  console.log('已发送：OFF')
+}
+</script>
+</body>
+</html>
