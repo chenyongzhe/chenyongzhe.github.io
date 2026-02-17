@@ -111,7 +111,7 @@ document.querySelectorAll('.btn-container button').forEach(btn => {
       client.publish(TOPIC, msg) // 发送指定字符串到MQTT主题
       // 按钮点击反馈（可选：短暂修改按钮文字提示发送成功）
       const originalText = this.textContent
-      this.textContent = `已发送: ${msg}`
+      this.textContent = `已发送`
       setTimeout(() => {
         this.textContent = originalText
       }, 1000)
