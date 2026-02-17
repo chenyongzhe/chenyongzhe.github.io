@@ -17,8 +17,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/mqtt@4.3.7/dist/mqtt.min.js"></script>
 <script>
-// 公共无加密 MQTT
-const client = mqtt.connect('ws://broker.emqx.io:8083/mqtt')
+// 关键：使用 wss 加密连接，兼容 GitHub Pages HTTPS
+const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt')
 
 const TOPIC = '/chenyongzhe'
 
