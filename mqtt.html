@@ -2,39 +2,124 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>MQTT 开关 /chenyongzhe</title>
+<!-- 标题已修改为「智能鱼塘投喂系统」 -->
+<title>智能鱼塘投喂系统</title>
 <style>
-  body{display:flex;gap:20px;justify-content:center;margin-top:50px}
-  button{width:150px;height:70px;font-size:24px;border:none;border-radius:10px;color:white}
-  #on{background:#2ecc71}
-  #off{background:#e74c3c}
+  body {
+    display: flex;
+    flex-direction: column; /* 垂直布局：状态区在上，按钮区在下 */
+    align-items: center;
+    gap: 30px;
+    margin-top: 50px;
+    font-family: Arial, sans-serif;
+  }
+  /* 连接状态显示区域样式 */
+  .status-box {
+    width: 300px;
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+  }
+  /* 未连接状态 */
+  .disconnected {
+    background: #e74c3c;
+  }
+  /* 已连接状态 */
+  .connected {
+    background: #2ecc71;
+  }
+  /* 按钮容器：网格布局，整齐排列按钮 */
+  .btn-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2列布局 */
+    gap: 20px;
+  }
+  /* 按钮样式 */
+  button {
+    width: 180px;
+    height: 80px;
+    font-size: 22px;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  /* 不同时长按钮区分背景色 */
+  .btn-5s { background: #3498db; }
+  .btn-10s { background: #9b59b6; }
+  .btn-15s { background: #1abc9c; }
+  .btn-30s { background: #f39c12; }
+  .btn-60s { background: #e67e22; }
+  .btn-120s { background: #8e44ad; }
+  /* 按钮点击反馈 */
+  button:active {
+    opacity: 0.8;
+  }
 </style>
 </head>
 <body>
+  <!-- 连接状态显示区域 -->
+  <div id="status" class="status-box disconnected">MQTT 未连接</div>
 
-<button id="on">发送 ON</button>
-<button id="off">发送 OFF</button>
+  <!-- 投喂按钮容器 -->
+  <div class="btn-container">
+    <button class="btn-5s" data-msg="w">投喂5秒</button>
+    <button class="btn-10s" data-msg="t">投喂10秒</button>
+    <button class="btn-15s" data-msg="s">投喂15秒</button>
+    <button class="btn-30s" data-msg="b">投喂30秒</button>
+    <button class="btn-60s" data-msg="y">投喂60秒</button>
+    <button class="btn-120s" data-msg="l">投喂120秒</button>
+  </div>
 
 <script src="https://cdn.jsdelivr.net/npm/mqtt@4.3.7/dist/mqtt.min.js"></script>
 <script>
-// 关键：使用 wss 加密连接，兼容 GitHub Pages HTTPS
+// MQTT连接配置
 const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt')
-
 const TOPIC = '/chenyongzhe'
+const statusElement = document.getElementById('status')
 
+// 监听MQTT连接成功事件：更新页面状态
 client.on('connect', function () {
-  console.log('✅ MQTT 连接成功')
+  statusElement.textContent = 'MQTT 已连接'
+  statusElement.className = 'status-box connected'
 })
 
-document.getElementById('on').onclick = () => {
-  client.publish(TOPIC, 'ON')
-  console.log('已发送：ON')
-}
+// 监听MQTT断开连接事件：更新页面状态
+client.on('close', function () {
+  statusElement.textContent = 'MQTT 已断开'
+  statusElement.className = 'status-box disconnected'
+})
 
-document.getElementById('off').onclick = () => {
-  client.publish(TOPIC, 'OFF')
-  console.log('已发送：OFF')
-}
+// 监听MQTT连接错误事件：更新页面状态
+client.on('error', function (err) {
+  statusElement.textContent = 'MQTT 连接失败'
+  statusElement.className = 'status-box disconnected'
+  console.error('MQTT错误：', err)
+})
+
+// 为所有投喂按钮绑定点击事件
+document.querySelectorAll('.btn-container button').forEach(btn => {
+  btn.addEventListener('click', function () {
+    // 先判断MQTT是否已连接，避免发送失败
+    if (client.connected) {
+      const msg = this.getAttribute('data-msg') // 获取按钮绑定的发送字符串
+      client.publish(TOPIC, msg) // 发送指定字符串到MQTT主题
+      // 按钮点击反馈（可选：短暂修改按钮文字提示发送成功）
+      const originalText = this.textContent
+      this.textContent = `已发送: ${msg}`
+      setTimeout(() => {
+        this.textContent = originalText
+      }, 1000)
+    } else {
+      alert('MQTT未连接，无法发送指令！')
+    }
+  })
+})
 </script>
 </body>
 </html>
