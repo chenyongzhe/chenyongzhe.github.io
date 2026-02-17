@@ -2,25 +2,24 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<!-- 标题已修改为「智能鱼塘投喂系统」 -->
 <title>智能鱼塘投喂系统</title>
 <style>
   body {
     display: flex;
     flex-direction: column; /* 垂直布局：状态区在上，按钮区在下 */
     align-items: center;
-    gap: 30px;
+    gap: 50px; /* 增大整体间距，适配大按钮 */
     margin-top: 50px;
     font-family: Arial, sans-serif;
   }
-  /* 连接状态显示区域样式 */
+  /* 连接状态显示区域样式 - 同步放大，匹配整体视觉 */
   .status-box {
-    width: 300px;
-    height: 60px;
-    line-height: 60px;
+    width: 400px; /* 原300px → 放大适配 */
+    height: 80px; /* 原60px → 放大适配 */
+    line-height: 80px;
     text-align: center;
-    border-radius: 10px;
-    font-size: 20px;
+    border-radius: 15px;
+    font-size: 28px; /* 原20px → 放大适配 */
     font-weight: bold;
     color: white;
   }
@@ -32,19 +31,19 @@
   .connected {
     background: #2ecc71;
   }
-  /* 按钮容器：网格布局，整齐排列按钮 */
+  /* 按钮容器：网格布局，增大间距避免拥挤 */
   .btn-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2列布局 */
-    gap: 20px;
+    grid-template-columns: repeat(2, 1fr); /* 保持2列布局 */
+    gap: 40px; /* 原20px → 增大到40px */
   }
-  /* 按钮样式 */
+  /* 按钮样式 - 核心：尺寸放大1倍 */
   button {
-    width: 180px;
-    height: 80px;
-    font-size: 22px;
+    width: 360px; /* 原180px × 2 = 360px */
+    height: 160px; /* 原80px × 2 = 160px */
+    font-size: 44px; /* 原22px × 2 = 44px */
     border: none;
-    border-radius: 10px;
+    border-radius: 20px; /* 原10px × 2 = 20px */
     color: white;
     cursor: pointer;
     transition: background 0.2s;
