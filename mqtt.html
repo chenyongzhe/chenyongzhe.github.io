@@ -12,41 +12,38 @@
     margin-top: 30px;
     font-family: Arial, sans-serif;
   }
-  /* 设备按钮容器 */
-  .device-btn-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 40px;
-  }
-  /* 设备切换按钮，和投喂按钮样式统一 */
-  .device-btn {
+  /* 设备下拉容器 */
+  .device-select-wrap {
     width: 360px;
+  }
+  #deviceSelect {
+    width: 100%;
     height: 160px;
     font-size: 44px;
     border: none;
     border-radius: 20px;
     color: white;
     cursor: pointer;
-    transition: all 0.2s;
+    background: #34495e;
+    padding: 0 20px;
+    /* 去掉下拉默认样式 */
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
   }
-  .device-btn span{
-    display:block;
-    font-size:24px;
-    margin-top:8px;
-    opacity:0.9;
+  /* 下拉箭头自定义 */
+  .device-select-wrap {
+    position: relative;
   }
-  /* 设备按钮颜色 */
-  .device-1{
-    background: #2980b9;
-  }
-  .device-2{
-    background: #d35400;
-  }
-  /* 选中高亮 */
-  .device-btn.active {
-    outline: 6px solid #f1c40f;
-    outline-offset: 4px;
-    transform: scale(1.03);
+  .device-select-wrap::after {
+    content: "▼";
+    color: #fff;
+    font-size: 40px;
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
   }
   /* 连接状态显示区域样式 */
   .status-box {
@@ -94,16 +91,12 @@
 </style>
 </head>
 <body>
-  <!-- 设备选择按钮组 -->
-  <div class="device-btn-container">
-    <button class="device-btn device-1 active" data-topic="/chenyongzhe">
-      设备1
-      <span>/chenyongzhe</span>
-    </button>
-    <button class="device-btn device-2" data-topic="/chenyongzhe2">
-      设备2
-      <span>/chenyongzhe2</span>
-    </button>
+  <!-- 设备下拉选择，尺寸和投喂按钮一致 -->
+  <div class="device-select-wrap">
+    <select id="deviceSelect">
+      <option value="/chenyongzhe">设备1 /chenyongzhe</option>
+      <option value="/chenyongzhe2">设备2 /chenyongzhe2</option>
+    </select>
   </div>
 
   <!-- 连接状态显示区域 -->
@@ -128,18 +121,12 @@ const client = mqtt.connect('wss://w9196d9a.ala.cn-shenzhen.emqxsl.cn:8084/mqtt'
 let currentTopic = '/chenyongzhe' // 默认设备1
 
 const statusElement = document.getElementById('status')
-const deviceButtons = document.querySelectorAll('.device-btn')
+const deviceSelect = document.getElementById('deviceSelect')
 
-// 设备切换点击事件
-deviceButtons.forEach(btn => {
-  btn.addEventListener('click', function () {
-    // 清除所有选中状态
-    deviceButtons.forEach(b => b.classList.remove('active'))
-    // 设置当前选中
-    this.classList.add('active')
-    currentTopic = this.getAttribute('data-topic')
-    console.log("已切换设备，当前MQTT主题：", currentTopic)
-  })
+// 下拉切换事件
+deviceSelect.addEventListener('change', function () {
+  currentTopic = this.value
+  console.log("已切换设备，当前MQTT主题：", currentTopic)
 })
 
 // MQTT连接成功
