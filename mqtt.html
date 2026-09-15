@@ -6,81 +6,104 @@
 <style>
   body {
     display: flex;
-    flex-direction: column; /* 垂直布局：状态区在上，按钮区在下 */
+    flex-direction: column;
     align-items: center;
     gap: 30px;
     margin-top: 30px;
     font-family: Arial, sans-serif;
   }
-  /* 设备选择区域 */
-  .device-select-box {
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    gap:15px;
+  /* 设备按钮容器 */
+  .device-btn-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
   }
-  #deviceSelect {
-    font-size:22px;
-    padding:8px 16px;
-    border-radius:10px;
+  /* 设备切换按钮，和投喂按钮样式统一 */
+  .device-btn {
+    width: 360px;
+    height: 160px;
+    font-size: 44px;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
   }
-  /* 连接状态显示区域样式 - 同步放大，匹配整体视觉 */
+  .device-btn span{
+    display:block;
+    font-size:24px;
+    margin-top:8px;
+    opacity:0.9;
+  }
+  /* 设备按钮颜色 */
+  .device-1{
+    background: #2980b9;
+  }
+  .device-2{
+    background: #d35400;
+  }
+  /* 选中高亮 */
+  .device-btn.active {
+    outline: 6px solid #f1c40f;
+    outline-offset: 4px;
+    transform: scale(1.03);
+  }
+  /* 连接状态显示区域样式 */
   .status-box {
-    width: 400px; /* 原300px → 放大适配 */
-    height: 80px; /* 原60px → 放大适配 */
+    width: 400px;
+    height: 80px;
     line-height: 80px;
     text-align: center;
     border-radius: 15px;
-    font-size: 28px; /* 原20px → 放大适配 */
+    font-size: 28px;
     font-weight: bold;
     color: white;
   }
-  /* 未连接状态 */
   .disconnected {
     background: #e74c3c;
   }
-  /* 已连接状态 */
   .connected {
     background: #2ecc71;
   }
-  /* 按钮容器：网格布局，增大间距避免拥挤 */
+  /* 投喂按钮容器 */
   .btn-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 保持2列布局 */
-    gap: 40px; /* 原20px → 增大到40px */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
   }
-  /* 按钮样式 - 核心：尺寸放大1倍 */
+  /* 投喂按钮 */
   button {
-    width: 360px; /* 原180px × 2 = 360px */
-    height: 160px; /* 原80px × 2 = 160px */
-    font-size: 44px; /* 原22px × 2 = 44px */
+    width: 360px;
+    height: 160px;
+    font-size: 44px;
     border: none;
-    border-radius: 20px; /* 原10px × 2 = 20px */
+    border-radius: 20px;
     color: white;
     cursor: pointer;
     transition: background 0.2s;
   }
-  /* 不同时长按钮区分背景色 */
   .btn-5s { background: #3498db; }
   .btn-10s { background: #9b59b6; }
   .btn-15s { background: #1abc9c; }
   .btn-30s { background: #f39c12; }
   .btn-60s { background: #e67e22; }
   .btn-120s { background: #8e44ad; }
-  /* 按钮点击反馈 */
   button:active {
     opacity: 0.8;
   }
 </style>
 </head>
 <body>
-  <!-- 设备切换下拉框 -->
-  <div class="device-select-box">
-    <label>选择设备：</label>
-    <select id="deviceSelect">
-      <option value="/chenyongzhe">设备1 (/chenyongzhe)</option>
-      <option value="/chenyongzhe2">设备2 (/chenyongzhe2)</option>
-    </select>
+  <!-- 设备选择按钮组 -->
+  <div class="device-btn-container">
+    <button class="device-btn device-1 active" data-topic="/chenyongzhe">
+      设备1
+      <span>/chenyongzhe</span>
+    </button>
+    <button class="device-btn device-2" data-topic="/chenyongzhe2">
+      设备2
+      <span>/chenyongzhe2</span>
+    </button>
   </div>
 
   <!-- 连接状态显示区域 -->
@@ -96,50 +119,52 @@
   </div>
 <script src="https://cdn.jsdelivr.net/npm/mqtt@4.3.7/dist/mqtt.min.js"></script>
 <script>
-// MQTT连接配置（已换成你的深圳EMQX Serverless实例）
+// MQTT连接配置
 const client = mqtt.connect('wss://w9196d9a.ala.cn-shenzhen.emqxsl.cn:8084/mqtt', {
   clientId: "web_" + Math.random().toString(16),
   username: "chenyongzhe",
   password: "cyz123456"
 })
-// 两个设备主题
-const TOPIC1 = '/chenyongzhe'
-const TOPIC2 = '/chenyongzhe2'
-let currentTopic = TOPIC1 // 默认选中设备1
+let currentTopic = '/chenyongzhe' // 默认设备1
 
 const statusElement = document.getElementById('status')
-const deviceSelect = document.getElementById('deviceSelect')
+const deviceButtons = document.querySelectorAll('.device-btn')
 
-// 下拉框切换事件，更新当前topic
-deviceSelect.addEventListener('change', function(){
-  currentTopic = this.value
-  console.log("已切换设备，当前MQTT主题：", currentTopic)
+// 设备切换点击事件
+deviceButtons.forEach(btn => {
+  btn.addEventListener('click', function () {
+    // 清除所有选中状态
+    deviceButtons.forEach(b => b.classList.remove('active'))
+    // 设置当前选中
+    this.classList.add('active')
+    currentTopic = this.getAttribute('data-topic')
+    console.log("已切换设备，当前MQTT主题：", currentTopic)
+  })
 })
 
-// 监听MQTT连接成功事件：更新页面状态
+// MQTT连接成功
 client.on('connect', function () {
   statusElement.textContent = 'MQTT 已连接'
   statusElement.className = 'status-box connected'
 })
-// 监听MQTT断开连接事件：更新页面状态
+// MQTT断开
 client.on('close', function () {
   statusElement.textContent = 'MQTT 已断开'
   statusElement.className = 'status-box disconnected'
 })
-// 监听MQTT连接错误事件：更新页面状态
+// MQTT错误
 client.on('error', function (err) {
   statusElement.textContent = 'MQTT 连接失败'
   statusElement.className = 'status-box disconnected'
   console.error('MQTT错误：', err)
 })
-// 为所有投喂按钮绑定点击事件
+
+// 投喂按钮点击事件
 document.querySelectorAll('.btn-container button').forEach(btn => {
   btn.addEventListener('click', function () {
-    // 先判断MQTT是否已连接，避免发送失败
     if (client.connected) {
-      const msg = this.getAttribute('data-msg') // 获取按钮绑定的发送字符串
-      client.publish(currentTopic, msg) // 发送到当前选中设备的主题
-      // 按钮点击反馈（可选：短暂修改按钮文字提示发送成功）
+      const msg = this.getAttribute('data-msg')
+      client.publish(currentTopic, msg)
       const originalText = this.textContent
       this.textContent = `已发送`
       setTimeout(() => {
